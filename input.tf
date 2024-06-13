@@ -66,3 +66,9 @@ variable event_sources_arn {
     default = []
     description = "Event sources arn"
 }
+
+variable batch_size {
+    type = number
+    default = 1
+    description = "Batch size"
+}
