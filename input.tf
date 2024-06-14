@@ -72,3 +72,9 @@ variable batch_size {
     default = 1
     description = "Batch size"
 }
+
+variable batch_window {
+    type = number
+    default = 0
+    description = "Batch window"
+}

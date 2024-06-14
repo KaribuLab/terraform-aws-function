@@ -71,4 +71,5 @@ resource "aws_lambda_event_source_mapping" "function" {
     enabled = true
     function_name = aws_lambda_function.function.arn
     batch_size = var.batch_size
+    batch_window = var.batch_window
 }
