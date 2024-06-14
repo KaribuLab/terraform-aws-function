@@ -70,5 +70,5 @@ resource "aws_lambda_event_source_mapping" "function" {
     event_source_arn = var.event_sources_arn[count.index]
     enabled = true
     function_name = aws_lambda_function.function.arn
-    batch_size = 1
+    batch_size = var.batch_size
 }
