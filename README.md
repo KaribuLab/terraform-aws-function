@@ -19,6 +19,7 @@ This module creates a straightforward Lambda function triggered by an event sour
 | zip_name              | string      | Name of the zip file                                              | yes      |
 | batch_size            | number      | Event source batch size **(default: 1)**                          | no       |
 | batch_window          | number      | Event source batch window **(default: 0)**                        | no       |
+| max_concurrency       | number      | Reserved concurrent executions                                    | no       |
 | common_tags           | map(string) | Common tags for components                                        | yes      |
 
 ## Outputs

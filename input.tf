@@ -78,3 +78,9 @@ variable batch_window {
     default = 0
     description = "Batch window"
 }
+
+variable max_concurrency {
+    type = number
+    default = -1
+    description = "Max concurrency"
+}
