@@ -1,7 +1,3 @@
-terraform {
-  backend "s3" {}
-}
-
 locals {
   iam_role_name = "${var.function_name}-execution-role"
   iam_policy_name = "${var.function_name}-policy"
