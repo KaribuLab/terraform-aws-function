@@ -15,7 +15,7 @@ resource "aws_iam_role" "function" {
         Effect = "Allow"
         Sid    = ""
         Principal = {
-          Service = "lambda.amazonaws.com"
+          Service = var.is_edge ? ["lambda.amazonaws.com", "edgelambda.amazonaws.com"] : ["lambda.amazonaws.com"]
         }
       }
     ]
@@ -94,6 +94,7 @@ resource "aws_lambda_function" "function" {
   memory_size                    = var.memory_size
   reserved_concurrent_executions = var.max_concurrency
   timeout                        = var.timeout
+  publish                        = var.publish
 
   dynamic "vpc_config" {
     for_each = var.vpc_config != null ? [var.vpc_config] : []

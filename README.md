@@ -22,6 +22,7 @@ This module creates a straightforward Lambda function triggered by an event sour
 | max_concurrency           | number       | Reserved concurrent executions                                    | no       |
 | common_tags               | map(string)  | Common tags for components                                        | yes      |
 | event_sources_arn         | list(string) | Event source ARN list **(default: [])**                           | no       |
+| publish                   | bool         | Publish a new version                                             | no       |
 | [vpc_config](#vpc_config) | object()     | VPC Configuration **(default: null)**                             | no       |
 
 ### vpc_config

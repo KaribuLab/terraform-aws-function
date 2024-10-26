@@ -92,5 +92,17 @@ variable "vpc_config" {
   })
   description = "VPC configuration"
   default     = null
+}
 
+variable "publish" {
+  type        = bool
+  default     = false
+  description = "Publish new version"
+}
+
+variable "is_edge" {
+  type        = bool
+  default     = false
+  description = "Is Lambda@Edge"
+  
 }
