@@ -1,6 +1,6 @@
 locals {
-  iam_role_name     = "${var.function_name}-execution-role"
-  iam_policy_name   = "${var.function_name}-policy"
+  iam_role_name     = var.role_name != null ? var.role_name : "${var.function_name}-execution-role"
+  iam_policy_name   = var.policy_name != null ? var.policy_name : "${var.function_name}-execution-policy"
   zip_name_location = "${var.zip_location}/${var.zip_name}"
   iam_policy_map    = jsondecode(var.iam_policy)
 }

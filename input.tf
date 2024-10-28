@@ -3,6 +3,18 @@ variable "function_name" {
   description = "Name of lambda function"
 }
 
+variable "policy_name" {
+  type        = string
+  description = "Policy name"
+  default     = null
+}
+
+variable "role_name" {
+  type        = string
+  description = "Role name"
+  default     = null
+}
+
 variable "iam_policy" {
   type        = string
   description = "IAM policy"
@@ -104,5 +116,5 @@ variable "is_edge" {
   type        = bool
   default     = false
   description = "Is Lambda@Edge"
-  
+
 }
