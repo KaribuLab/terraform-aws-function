@@ -7,6 +7,8 @@ This module creates a straightforward Lambda function triggered by an event sour
 | Name                      | Type         | Description                                                       | Required |
 | ------------------------- | ------------ | ----------------------------------------------------------------- | -------- |
 | function_name             | string       | Name of lambda function                                           | yes      |
+| role_name                 | string       | Lambda function role name                                         | no       |
+| policy_name               | string       | Lambda function policy name                                       | no       |
 | iam_policy                | string       | JSON IAM policy                                                   | yes      |
 | runtime                   | string       | Runtime for lambda function                                       | yes      |
 | handler                   | string       | Handler for lambda function                                       | yes      |
