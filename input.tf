@@ -97,6 +97,12 @@ variable "max_concurrency" {
   description = "Max concurrency"
 }
 
+variable "provisioned_concurrency" {
+  type        = number
+  default     = 0
+  description = "Provisioned concurrency"
+}
+
 variable "vpc_config" {
   type = object({
     subnet_ids         = list(string)

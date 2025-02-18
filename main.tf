@@ -110,6 +110,13 @@ resource "aws_lambda_function" "function" {
   tags = var.common_tags
 }
 
+resource "aws_lambda_provisioned_concurrency_config" "function" {
+  count                             = var.provisioned_concurrency > 0 ? 1 : 0
+  function_name                     = aws_lambda_function.function.function_name
+  provisioned_concurrent_executions = var.provisioned_concurrency
+  qualifier                         = aws_lambda_function.function.version
+}
+
 resource "aws_lambda_event_source_mapping" "function" {
   count                              = length(var.event_sources_arn)
   event_source_arn                   = var.event_sources_arn[count.index]
