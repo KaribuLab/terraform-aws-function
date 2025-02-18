@@ -94,7 +94,7 @@ resource "aws_lambda_function" "function" {
   memory_size                    = var.memory_size
   reserved_concurrent_executions = var.max_concurrency
   timeout                        = var.timeout
-  publish                        = var.publish
+  publish                        = var.publish || var.provisioned_concurrency > 0
 
   dynamic "vpc_config" {
     for_each = var.vpc_config != null ? [var.vpc_config] : []
@@ -111,7 +111,7 @@ resource "aws_lambda_function" "function" {
 }
 
 resource "aws_lambda_provisioned_concurrency_config" "function" {
-  count                             = var.provisioned_concurrency > 0 ? 1 : 0
+  count                             = var.provisioned_concurrency > 0 && aws_lambda_function.function.version != "$LATEST" ? 1 : 0
   function_name                     = aws_lambda_function.function.function_name
   provisioned_concurrent_executions = var.provisioned_concurrency
   qualifier                         = aws_lambda_function.function.version
