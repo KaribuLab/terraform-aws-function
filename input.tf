@@ -97,6 +97,12 @@ variable "max_concurrency" {
   description = "Max concurrency"
 }
 
+variable "alias" {
+  type        = string
+  default     = null
+  description = "Alias"
+}
+
 variable "provisioned_concurrency" {
   type        = number
   default     = 0

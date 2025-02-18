@@ -110,11 +110,19 @@ resource "aws_lambda_function" "function" {
   tags = var.common_tags
 }
 
+resource "aws_lambda_alias" "function" {
+  count            = var.alias != null ? 1 : 0
+  name             = var.alias
+  function_name    = aws_lambda_function.function.arn
+  function_version = aws_lambda_function.function.version
+
+}
+
 resource "aws_lambda_provisioned_concurrency_config" "function" {
   count                             = var.provisioned_concurrency > 0 ? 1 : 0
-  function_name                     = aws_lambda_function.function.function_name
+  function_name                     = var.alias != null ? aws_lambda_alias.function[count.index].function_name : aws_lambda_function.function.arn
   provisioned_concurrent_executions = var.provisioned_concurrency
-  qualifier                         = aws_lambda_function.function.version
+  qualifier                         = var.alias != null ? aws_lambda_alias.function[count.index].name : aws_lambda_function.function.version
 }
 
 resource "aws_lambda_event_source_mapping" "function" {
