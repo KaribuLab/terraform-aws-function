@@ -110,6 +110,26 @@ resource "aws_lambda_function" "function" {
   tags = var.common_tags
 }
 
+resource "aws_lambda_function_url" "function" {
+  count              = var.function_url != null ? 1 : 0
+  function_name      = aws_lambda_function.function.function_name
+  authorization_type = var.function_url.authorization_type
+  cors {
+    allow_origins  = var.function_url.cors.allow_origins
+    allow_methods  = var.function_url.cors.allow_methods
+    allow_headers  = var.function_url.cors.allow_headers
+    expose_headers = var.function_url.cors.expose_headers
+  }
+}
+
+resource "aws_lambda_permission" "function" {
+  count                  = var.function_url != null ? 1 : 0
+  function_name          = aws_lambda_function.function.function_name
+  action                 = "lambda:InvokeFunctionUrl"
+  principal              = "lambda.amazonaws.com"
+  function_url_auth_type = var.function_url.authorization_type
+}
+
 resource "aws_lambda_alias" "function" {
   count            = var.alias != null ? 1 : 0
   name             = var.alias

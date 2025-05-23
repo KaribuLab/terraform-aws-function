@@ -124,6 +124,20 @@ variable "publish" {
   description = "Publish new version"
 }
 
+variable "function_url" {
+  type        = object({
+    authorization_type = string
+    cors = object({
+      allow_origins = list(string)
+      allow_methods = list(string)
+      allow_headers = list(string)
+      expose_headers = list(string)
+    })
+  })
+  default     = null
+  description = "Function URL configuration"
+}
+
 variable "is_edge" {
   type        = bool
   default     = false

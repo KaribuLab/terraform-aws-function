@@ -3,6 +3,11 @@ output "function_name" {
   description = "Function name"
 }
 
+output "function_url" {
+  value       = var.function_url != null ? aws_lambda_function_url.function[0].function_url : null
+  description = "Function URL"
+}
+
 output "invoke_arn" {
   value       = aws_lambda_function.function.invoke_arn
   description = "Function invoke ARN"
