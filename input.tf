@@ -22,13 +22,14 @@ variable "iam_policy" {
 
 variable "runtime" {
   type        = string
-  description = "Runtime"
+  description = "Runtime (required when package_type is Zip)"
+  default     = null
 }
 
 variable "handler" {
   type        = string
-  description = "Handler"
-
+  description = "Handler (required when package_type is Zip)"
+  default     = null
 }
 
 variable "memory_size" {
@@ -50,22 +51,26 @@ variable "environment_variables" {
 
 variable "bucket" {
   type        = string
-  description = "Bucket for lambda function"
+  description = "Bucket for lambda function (required when package_type is Zip)"
+  default     = null
 }
 
 variable "file_location" {
   type        = string
-  description = "File location"
+  description = "File location (required when package_type is Zip)"
+  default     = null
 }
 
 variable "zip_location" {
   type        = string
-  description = "Zip location"
+  description = "Zip location (required when package_type is Zip)"
+  default     = null
 }
 
 variable "zip_name" {
   type        = string
-  description = "Zip name"
+  description = "Zip name (required when package_type is Zip)"
+  default     = null
 }
 
 variable "common_tags" {
@@ -143,4 +148,20 @@ variable "is_edge" {
   default     = false
   description = "Is Lambda@Edge"
 
+}
+
+variable "package_type" {
+  type        = string
+  default     = "Zip"
+  description = "Lambda deployment package type (Zip or Image)"
+  validation {
+    condition     = contains(["Zip", "Image"], var.package_type)
+    error_message = "package_type must be either 'Zip' or 'Image'."
+  }
+}
+
+variable "image_uri" {
+  type        = string
+  default     = null
+  description = "ECR image URI (required when package_type is Image)"
 }

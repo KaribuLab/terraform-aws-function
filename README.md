@@ -2,6 +2,10 @@
 
 This module creates a straightforward Lambda function triggered by an event source.
 
+Supports both deployment types:
+- **Zip package**: Deploy Lambda function from a ZIP file uploaded to S3
+- **Docker Image**: Deploy Lambda function from a container image in ECR
+
 ## Inputs
 
 | Name                      | Type         | Description                                                       | Required |
@@ -10,15 +14,17 @@ This module creates a straightforward Lambda function triggered by an event sour
 | role_name                 | string       | Lambda function role name                                         | no       |
 | policy_name               | string       | Lambda function policy name                                       | no       |
 | iam_policy                | string       | JSON IAM policy                                                   | yes      |
-| runtime                   | string       | Runtime for lambda function                                       | yes      |
-| handler                   | string       | Handler for lambda function                                       | yes      |
+| package_type              | string       | Lambda deployment package type: Zip or Image **(default: Zip)**   | no       |
+| runtime                   | string       | Runtime for lambda function (required when package_type is Zip)   | conditional |
+| handler                   | string       | Handler for lambda function (required when package_type is Zip)   | conditional |
+| image_uri                 | string       | ECR image URI (required when package_type is Image)               | conditional |
 | memory_size               | number       | Memory size for lambda function **(default: 128)**                | no       |
 | timeout                   | number       | Timeout seconds for lambda function **(default: 30)**             | no       |
 | environment_variables     | map(string)  | Environment variables for lambda function                         | yes      |
-| bucket                    | string       | Name of bucket where de packaged lambda function will be uploaded | yes      |
-| file_location             | string       | Local path to the packaged lambda function                        | yes      |
-| zip_location              | string       | Local path to the generated zip lambda function                   | yes      |
-| zip_name                  | string       | Name of the zip file                                              | yes      |
+| bucket                    | string       | Name of bucket (required when package_type is Zip)                | conditional |
+| file_location             | string       | Local path to source files (required when package_type is Zip)    | conditional |
+| zip_location              | string       | Local path to generated zip (required when package_type is Zip)   | conditional |
+| zip_name                  | string       | Name of the zip file (required when package_type is Zip)          | conditional |
 | batch_size                | number       | Event source batch size **(default: 1)**                          | no       |
 | batch_window              | number       | Event source batch window **(default: 0)**                        | no       |
 | max_concurrency           | number       | Reserved concurrent executions **(default: -1)**                  | no       |
@@ -63,3 +69,86 @@ This module creates a straightforward Lambda function triggered by an event sour
 | invoke_arn     | string | Function invoke ARN  |
 | lambda_arn     | string | Function ARN         |
 | lambda_version | string | Function version     |
+
+## Usage Examples
+
+### Example 1: Lambda with Zip Package (Default)
+
+```hcl
+module "lambda_zip" {
+  source = "git::https://github.com/KaribuLab/terraform-aws-function.git?ref=v0.8.0"
+
+  function_name = "my-lambda-function"
+  runtime       = "nodejs20.x"
+  handler       = "index.handler"
+
+  bucket        = "my-deployment-bucket"
+  file_location = "${path.module}/src"
+  zip_location  = "${path.module}/dist"
+  zip_name      = "lambda.zip"
+
+  iam_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"]
+        Resource = "arn:aws:logs:*:*:*"
+      }
+    ]
+  })
+
+  environment_variables = {
+    ENV = "production"
+  }
+
+  timeout     = 30
+  memory_size = 512
+
+  common_tags = {
+    Environment = "prod"
+    Project     = "my-project"
+  }
+}
+```
+
+### Example 2: Lambda with Docker Image
+
+```hcl
+module "lambda_image" {
+  source = "git::https://github.com/KaribuLab/terraform-aws-function.git?ref=v0.8.0"
+
+  function_name = "my-lambda-container"
+  package_type  = "Image"
+  image_uri     = "123456789012.dkr.ecr.us-west-2.amazonaws.com/my-lambda:latest"
+
+  iam_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = ["s3:PutObject"]
+        Resource = "arn:aws:s3:::my-bucket/*"
+      },
+      {
+        Effect = "Allow"
+        Action = ["batch:SubmitJob"]
+        Resource = ["arn:aws:batch:*:*:job-queue/*", "arn:aws:batch:*:*:job-definition/*"]
+      }
+    ]
+  })
+
+  environment_variables = {
+    S3_BUCKET_NAME = "my-bucket"
+    AWS_REGION     = "us-west-2"
+  }
+
+  timeout     = 60
+  memory_size = 1024
+
+  common_tags = {
+    Environment = "prod"
+    Project     = "my-project"
+  }
+}
+```

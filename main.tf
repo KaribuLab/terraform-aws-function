@@ -1,7 +1,7 @@
 locals {
   iam_role_name     = var.role_name != null ? var.role_name : "${var.function_name}-execution-role"
   iam_policy_name   = var.policy_name != null ? var.policy_name : "${var.function_name}-execution-policy"
-  zip_name_location = "${var.zip_location}/${var.zip_name}"
+  zip_name_location = var.package_type == "Zip" && var.zip_location != null && var.zip_name != null ? "${var.zip_location}/${var.zip_name}" : null
   iam_policy_map    = jsondecode(var.iam_policy)
 }
 
@@ -67,30 +67,40 @@ resource "aws_iam_role_policy" "function" {
 }
 
 data "archive_file" "function" {
+  count       = var.package_type == "Zip" ? 1 : 0
   type        = "zip"
   source_dir  = var.file_location
   output_path = local.zip_name_location
 }
 
 data "aws_s3_bucket" "function" {
+  count  = var.package_type == "Zip" ? 1 : 0
   bucket = var.bucket
 }
 
 resource "aws_s3_object" "function" {
-  bucket = data.aws_s3_bucket.function.id
+  count  = var.package_type == "Zip" ? 1 : 0
+  bucket = data.aws_s3_bucket.function[0].id
   key    = "${var.function_name}/${var.zip_name}"
-  source = data.archive_file.function.output_path
-  etag   = filemd5(data.archive_file.function.output_path)
+  source = data.archive_file.function[0].output_path
+  etag   = filemd5(data.archive_file.function[0].output_path)
 }
 
 resource "aws_lambda_function" "function" {
   function_name                  = var.function_name
   role                           = aws_iam_role.function.arn
-  s3_bucket                      = data.aws_s3_bucket.function.id
-  s3_key                         = aws_s3_object.function.key
-  source_code_hash               = data.archive_file.function.output_base64sha256
-  runtime                        = var.runtime
-  handler                        = var.handler
+  package_type                   = var.package_type
+
+  # Configuration for Zip package
+  s3_bucket                      = var.package_type == "Zip" ? data.aws_s3_bucket.function[0].id : null
+  s3_key                         = var.package_type == "Zip" ? aws_s3_object.function[0].key : null
+  source_code_hash               = var.package_type == "Zip" ? data.archive_file.function[0].output_base64sha256 : null
+  runtime                        = var.package_type == "Zip" ? var.runtime : null
+  handler                        = var.package_type == "Zip" ? var.handler : null
+
+  # Configuration for Image package
+  image_uri                      = var.package_type == "Image" ? var.image_uri : null
+
   memory_size                    = var.memory_size
   reserved_concurrent_executions = var.max_concurrency
   timeout                        = var.timeout
