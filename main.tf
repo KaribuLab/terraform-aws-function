@@ -1,3 +1,12 @@
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "<= 6.7.0"
+    }
+  }
+}
+
 locals {
   iam_role_name     = var.role_name != null ? var.role_name : "${var.function_name}-execution-role"
   iam_policy_name   = var.policy_name != null ? var.policy_name : "${var.function_name}-execution-policy"
