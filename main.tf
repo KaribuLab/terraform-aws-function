@@ -92,6 +92,7 @@ resource "aws_lambda_function" "function" {
   runtime                        = var.runtime
   handler                        = var.handler
   memory_size                    = var.memory_size
+  architectures                  = var.architectures
   reserved_concurrent_executions = var.max_concurrency
   timeout                        = var.timeout
   publish                        = var.publish || var.provisioned_concurrency > 0

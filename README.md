@@ -27,6 +27,7 @@ This module creates a straightforward Lambda function triggered by an event sour
 | common_tags               | map(string)  | Common tags for components                                        | yes      |
 | event_sources_arn         | list(string) | Event source ARN list **(default: [])**                           | no       |
 | publish                   | bool         | Publish a new version **(default: false)**                        | no       |
+| architectures             | list(string) | Instruction set architectures **(default: ["x86_64"])**           | no       |
 | [vpc_config](#vpc_config) | object()     | VPC Configuration **(default: null)**                             | no       |
 | function_url              | object()     | Function URL configuration **(default: null)**                    | no       |
 | is_edge                   | bool         | Is Lambda@Edge **(default: false)**                               | no       |

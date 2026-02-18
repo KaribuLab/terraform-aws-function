@@ -124,6 +124,12 @@ variable "publish" {
   description = "Publish new version"
 }
 
+variable "architectures" {
+  type        = list(string)
+  default     = ["x86_64"]
+  description = "Architectures"
+}
+
 variable "function_url" {
   type        = object({
     authorization_type = string
