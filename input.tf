@@ -18,7 +18,7 @@ variable "role_name" {
 variable "iam_policy" {
   type        = string
   description = "IAM policy"
-  default = "{}"
+  default     = "{}"
 }
 
 variable "runtime" {
@@ -137,12 +137,12 @@ variable "architectures" {
 }
 
 variable "function_url" {
-  type        = object({
+  type = object({
     authorization_type = string
     cors = object({
-      allow_origins = list(string)
-      allow_methods = list(string)
-      allow_headers = list(string)
+      allow_origins  = list(string)
+      allow_methods  = list(string)
+      allow_headers  = list(string)
       expose_headers = list(string)
     })
   })
