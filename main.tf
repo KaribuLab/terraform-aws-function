@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "<= 6.7.0"
+      version = "<= 6.35.0"
     }
   }
 }
@@ -59,8 +59,8 @@ resource "aws_iam_role_policy" "function" {
           "ec2:UnassignPrivateIpAddresses"
         ]
         Resource = [
-          "arn:aws:ec2:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:subnet/*",
-          "arn:aws:ec2:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:vpc/*"
+          "arn:aws:ec2:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:subnet/*",
+          "arn:aws:ec2:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:vpc/*"
         ]
       },
       {
@@ -69,7 +69,7 @@ resource "aws_iam_role_policy" "function" {
           "kms:Decrypt",
           "kms:DescribeKey"
         ]
-        Resource = "arn:aws:kms:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:key/*"
+        Resource = "arn:aws:kms:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:key/*"
       }
     ])
   })
