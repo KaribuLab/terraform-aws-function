@@ -1,3 +1,13 @@
+output "role_name" {
+  value       = aws_iam_role.function.name
+  description = "Role name"
+}
+
+output "role_id" {
+  value       = aws_iam_role.function.id
+  description = "Role ID"
+}
+
 output "function_name" {
   value       = aws_lambda_function.function.function_name
   description = "Function name"

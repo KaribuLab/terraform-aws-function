@@ -65,7 +65,9 @@ Supports both deployment types:
 
 | Name           | Type   | Description          |
 | -------------- | ------ | -------------------- |
-| function_name  | string | Lambda function name |
+| role_name      | string | Role name            |
+| role_id        | string | Role ID              |
+| function_name  | string | Function name        |
 | function_url   | string | Function URL         |
 | invoke_arn     | string | Function invoke ARN  |
 | lambda_arn     | string | Function ARN         |
