@@ -18,6 +18,7 @@ variable "role_name" {
 variable "iam_policy" {
   type        = string
   description = "IAM policy"
+  default = "{}"
 }
 
 variable "runtime" {
