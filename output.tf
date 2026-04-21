@@ -1,11 +1,16 @@
 output "role_name" {
-  value       = aws_iam_role.function.name
+  value       = var.lambda_role_arn != null ? null : aws_iam_role.function[0].name
   description = "Role name"
 }
 
 output "role_id" {
-  value       = aws_iam_role.function.id
-  description = "Role ID"
+  value       = var.lambda_role_arn != null ? null : aws_iam_role.function[0].id
+  description = "IAM role unique ID (empty when execution role is supplied via lambda_role_arn)"
+}
+
+output "role_arn" {
+  value       = length(aws_iam_role.function) > 0 ? aws_iam_role.function[0].arn : var.lambda_role_arn
+  description = "Execution role ARN (created by this module or from lambda_role_arn)"
 }
 
 output "function_name" {

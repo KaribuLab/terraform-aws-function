@@ -15,7 +15,8 @@ locals {
 }
 
 resource "aws_iam_role" "function" {
-  name = local.iam_role_name
+  count = var.lambda_role_arn != null ? 0 : 1
+  name  = local.iam_role_name
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -37,8 +38,9 @@ data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
 resource "aws_iam_role_policy" "function" {
-  name = local.iam_policy_name
-  role = aws_iam_role.function.id
+  count = var.lambda_role_arn != null ? 0 : 1
+  name  = local.iam_policy_name
+  role  = aws_iam_role.function[count.index].id
   policy = var.vpc_config == null ? var.iam_policy : jsonencode({
     Version = local.iam_policy_map.Version
     Statement = concat(local.iam_policy_map.Statement, [
@@ -96,19 +98,19 @@ resource "aws_s3_object" "function" {
 }
 
 resource "aws_lambda_function" "function" {
-  function_name                  = var.function_name
-  role                           = aws_iam_role.function.arn
-  package_type                   = var.package_type
+  function_name = var.function_name
+  role          = length(aws_iam_role.function) > 0 ? aws_iam_role.function[0].arn : var.lambda_role_arn
+  package_type  = var.package_type
 
   # Configuration for Zip package
-  s3_bucket                      = var.package_type == "Zip" ? data.aws_s3_bucket.function[0].id : null
-  s3_key                         = var.package_type == "Zip" ? aws_s3_object.function[0].key : null
-  source_code_hash               = var.package_type == "Zip" ? data.archive_file.function[0].output_base64sha256 : null
-  runtime                        = var.package_type == "Zip" ? var.runtime : null
-  handler                        = var.package_type == "Zip" ? var.handler : null
+  s3_bucket        = var.package_type == "Zip" ? data.aws_s3_bucket.function[0].id : null
+  s3_key           = var.package_type == "Zip" ? aws_s3_object.function[0].key : null
+  source_code_hash = var.package_type == "Zip" ? data.archive_file.function[0].output_base64sha256 : null
+  runtime          = var.package_type == "Zip" ? var.runtime : null
+  handler          = var.package_type == "Zip" ? var.handler : null
 
   # Configuration for Image package
-  image_uri                      = var.package_type == "Image" ? var.image_uri : null
+  image_uri = var.package_type == "Image" ? var.image_uri : null
 
   memory_size                    = var.memory_size
   architectures                  = var.architectures
@@ -128,6 +130,13 @@ resource "aws_lambda_function" "function" {
     variables = var.environment_variables
   }
   tags = var.common_tags
+
+  lifecycle {
+    precondition {
+      condition     = length(aws_iam_role.function) > 0 || var.lambda_role_arn != null
+      error_message = "Defina lambda_role_arn con el ARN del rol existente, o use lambda_role_arn = null para que el módulo cree el rol de ejecución."
+    }
+  }
 }
 
 resource "aws_lambda_function_url" "function" {
