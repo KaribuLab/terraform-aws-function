@@ -6,14 +6,17 @@ Supports both deployment types:
 - **Zip package**: Deploy Lambda function from a ZIP file uploaded to S3
 - **Docker Image**: Deploy Lambda function from a container image in ECR
 
+**Execution role:** By default the module creates an IAM role and attaches the inline policy from `iam_policy`. Set **`lambda_role_arn`** to the ARN of an existing role to skip role and policy creation; the Lambda still uses that role, but you must grant all required permissions on that role outside this module.
+
 ## Inputs
 
 | Name                      | Type         | Description                                                       | Required |
 | ------------------------- | ------------ | ----------------------------------------------------------------- | -------- |
 | function_name             | string       | Name of lambda function                                           | yes      |
+| lambda_role_arn           | string       | Existing Lambda execution role ARN (if set, module does not create IAM role or policy) | no       |
 | role_name                 | string       | Lambda function role name                                         | no       |
 | policy_name               | string       | Lambda function policy name                                       | no       |
-| iam_policy                | string       | JSON IAM policy                                                   | yes      |
+| iam_policy                | string       | JSON IAM policy (used only when `lambda_role_arn` is not set)     | no¹      |
 | package_type              | string       | Lambda deployment package type: Zip or Image **(default: Zip)**   | no       |
 | runtime                   | string       | Runtime for lambda function (required when package_type is Zip)   | conditional |
 | handler                   | string       | Handler for lambda function (required when package_type is Zip)   | conditional |
@@ -37,6 +40,8 @@ Supports both deployment types:
 | [vpc_config](#vpc_config) | object()     | VPC Configuration **(default: null)**                             | no       |
 | function_url              | object()     | Function URL configuration **(default: null)**                    | no       |
 | is_edge                   | bool         | Is Lambda@Edge **(default: false)**                               | no       |
+
+¹ When the module creates the execution role (`lambda_role_arn` omitted), provide a policy that allows logging and any other actions your function needs. When using `lambda_role_arn`, inline policy in this module is not attached; configure the external role elsewhere.
 
 ### vpc_config
 
@@ -63,15 +68,16 @@ Supports both deployment types:
 
 ## Outputs
 
-| Name           | Type   | Description          |
-| -------------- | ------ | -------------------- |
-| role_name      | string | Role name            |
-| role_id        | string | Role ID              |
-| function_name  | string | Function name        |
-| function_url   | string | Function URL         |
-| invoke_arn     | string | Function invoke ARN  |
-| lambda_arn     | string | Function ARN         |
-| lambda_version | string | Function version     |
+| Name           | Type           | Description |
+| -------------- | -------------- | ----------- |
+| role_name      | string \| null | IAM role name created by this module; `null` when `lambda_role_arn` is set |
+| role_id        | string \| null | IAM role unique ID when the module creates the role; `null` when `lambda_role_arn` is set |
+| role_arn       | string         | Effective execution role ARN (module-created role or value of `lambda_role_arn`) |
+| function_name  | string         | Function name |
+| function_url   | string \| null | Function URL when `function_url` is configured; otherwise `null` |
+| invoke_arn     | string         | Function invoke ARN |
+| lambda_arn     | string         | Function ARN |
+| lambda_version | string         | Function version |
 
 ## Usage Examples
 
@@ -115,7 +121,32 @@ module "lambda_zip" {
 }
 ```
 
-### Example 2: Lambda with Docker Image
+### Example 2: Lambda with an existing IAM execution role
+
+When `lambda_role_arn` is set, the module does not create `aws_iam_role` or `aws_iam_role_policy`. Ensure the external role trusts `lambda.amazonaws.com` and has all permissions your code needs. Use output **`role_arn`** for the effective execution role ARN in both modes; **`role_id`** and **`role_name`** are only set when the module creates the role.
+
+```hcl
+module "lambda_existing_role" {
+  source = "git::https://github.com/KaribuLab/terraform-aws-function.git?ref=v0.8.0"
+
+  function_name     = "my-lambda-with-existing-role"
+  lambda_role_arn   = "arn:aws:iam::123456789012:role/my-lambda-execution-role"
+  runtime           = "nodejs20.x"
+  handler           = "index.handler"
+
+  bucket        = "my-deployment-bucket"
+  file_location = "${path.module}/src"
+  zip_location  = "${path.module}/dist"
+  zip_name      = "lambda.zip"
+
+  # iam_policy is not attached when lambda_role_arn is set (module default is fine)
+
+  environment_variables = { ENV = "production" }
+  common_tags = { Environment = "prod" }
+}
+```
+
+### Example 3: Lambda with Docker Image
 
 ```hcl
 module "lambda_image" {

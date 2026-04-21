@@ -9,6 +9,12 @@ variable "policy_name" {
   default     = null
 }
 
+variable "lambda_role_arn" {
+  type        = string
+  description = "Lambda role ARN"
+  default     = null
+}
+
 variable "role_name" {
   type        = string
   description = "Role name"
